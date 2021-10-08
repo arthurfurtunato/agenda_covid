@@ -131,3 +131,13 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ESTABELECIMENTOS_URL = 'https://selecoes.lais.huol.ufrn.br/static/estabelecimentos.json'
+
+from django.contrib.messages import constants
+
+MESSAGE_TAGS = {
+    constants.DEBUG: 'debug',
+    constants.INFO: 'info',
+    constants.SUCCESS: 'success',
+    constants.WARNING: 'warning',
+    constants.ERROR: 'error',
+}
