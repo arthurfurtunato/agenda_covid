@@ -2,8 +2,8 @@ from django.core.checks import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages, auth
-from core.common import get_dias_ocupados_por_estabelecimento, validador_cpf
-from datetime import date
+from core.common import get_dias_ocupados_por_estabelecimento, horarios_livres_por_dia_por_estabelecimento, validador_cpf
+from datetime import date, datetime
 import json
 
 from core.models import Agendamento, Cidadao, EstabelecimentoSaude
@@ -15,11 +15,19 @@ def index(request):
     if request.user.is_authenticated:
         cidadao = Cidadao.objects.filter(usuario=request.user).first() #Filtrando em cidadaos o usuario logado, e pegando o primeiro QuerySet
         idade = date.today().year - cidadao.nascimento.year
+        agendamento = Agendamento.objects.filter(cidadao=cidadao)
+        agendamento_estab = ""
+        agendamento_data = ""
+        if len(agendamento) > 0:
+            agendamento_estab = agendamento.first().estabelecimento.dados_estabelecimento["NO_FANTASIA"]
+            agendamento_data = agendamento.first().data_vacinacao.strftime("%d/%m/%Y às %H:%M")
         if date(date.today().year, cidadao.nascimento.month, cidadao.nascimento.day) > date.today():
             idade = idade - 1
         return render(request, 'index.html', {
             'cidadao': cidadao,
-            'idade': idade
+            'idade': idade,
+            'agendamento_estab': agendamento_estab,
+            'agendamento_data': agendamento_data, 
         })
     else:
         return render(request, 'index_noauth.html')
@@ -109,7 +117,32 @@ def agendar(request):
                 'estabelecimento_nome': estab_n.dados_estabelecimento["NO_FANTASIA"],
                 'dias_ocupados': json.dumps(dias_ocupados)
             })
-    return render(request, 'agendar.html')
+        elif 'data' in request.POST and not 'horarios' in request.POST:
+            lista_horas = horarios_livres_por_dia_por_estabelecimento(request.POST['estabelecimento_id'], request.POST["data"])
+            return render(request, 'agendar3.html', {
+                'horarios': lista_horas,
+                'data': request.POST["data"],
+                'estabelecimento_id': request.POST["estabelecimento_id"],
+                'estabelecimento_nome': request.POST["estabelecimento_nome"]
+            })
+        elif 'horarios' in request.POST and not 'salvar' in request.POST:
+            return render(request, 'agendar4.html', {
+                'horarios': request.POST['horarios'],
+                'data':request.POST['data'],
+                'estabelecimento_id':request.POST['estabelecimento_id'],
+                'estabelecimento_nome':request.POST['estabelecimento_nome']
+            })
+
+        elif 'salvar':
+            estabelecimento = EstabelecimentoSaude.objects.filter(id=request.POST['estabelecimento_id']).first()
+            cidadao = Cidadao.objects.filter(usuario=request.user).first()
+            data = datetime.strptime(f'{request.POST["data"]} {request.POST["horarios"]}', "%d/%m/%Y %H:%M")
+
+            agendamento = Agendamento(cidadao=cidadao, estabelecimento=estabelecimento, data_vacinacao=data)
+            agendamento.save()
+
+            messages.success(request, "Agendamento confirmado com sucesso")
+            return redirect('index')
 
 def sair(request):
     auth.logout(request)

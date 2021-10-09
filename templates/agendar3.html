@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Agendar{% endblock %}
+
+{% block conteudo %}
+<h1 style="margin-top: 20px;">Continuando o agendamento</h1>
+<figcaption class="blockquote-footer" style="margin-top: 10px;">
+    Finalizando o cadastro, como ultimo passo escolha o melhor horário dentre os disponíveis.
+</figcaption>
+<br>
+<form method="POST" action="{% url 'agendar' %}">
+{% csrf_token %}
+<input type="hidden" value="{{ estabelecimento_id }}" name="estabelecimento_id">
+<input type="hidden" value="{{ estabelecimento_nome }}" name="estabelecimento_nome">
+<input type="hidden" value="{{ data }}" name="data">
+
+<p>Estabelecimento escolhido: {{ estabelecimento_nome }}</p>
+<p>Data escolhida: {{ data }}</p>
+<div class="form-group">
+    <label for="sel1">Horarios:</label>
+    <select class="form-control" id="horarios" name="horarios">
+        {% for h in horarios %}
+            <option>{{ h }}</option>
+        {% endfor %}
+    </select>   
+</div>  
+<div class="mt-3 mb-3">
+    <button type="submit" class="btn btn-primary">Próximo</button>
+</div>
+</form>
+{% endblock %}

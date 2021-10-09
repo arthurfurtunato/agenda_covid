@@ -51,4 +51,13 @@ def get_dias_ocupados_por_estabelecimento(est_id):
             by_dias[i.data_vacinacao.date()] = [i.cidadao.id]
     dias_ocupados = [i for i, v in by_dias if len(v) >= 24]
     return dias_ocupados
-    
+
+def horarios_livres_por_dia_por_estabelecimento(est_id, data):
+    horarios_disp = []
+    dia_horas = Agendamento.objects.filter(estabelecimento=est_id, data_vacinacao__date=datetime.strptime(data, "%d/%m/%Y").date())
+    dia_horas = [h.data_vacinacao for h in dia_horas]
+    for i in range(24):
+        agenda_add = datetime.strptime(f'{data} 08:00', "%d/%m/%Y %H:%M") + timedelta(minutes=10*i)
+        if not agenda_add in horarios_disp:
+            horarios_disp.append(agenda_add.strftime("%H:%M"))
+    return horarios_disp
