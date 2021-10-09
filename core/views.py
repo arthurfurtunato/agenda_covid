@@ -101,6 +101,9 @@ def entrar(request):
         return redirect('index')
 
 def agendar(request):
+    if len(Agendamento.objects.filter(cidadao=Cidadao.objects.filter(usuario=request.user).first())) > 0:
+        messages.info(request, 'Cidadao ja tem agendamento')
+        return redirect('index')
     if request.method == 'GET':
         estabelecimentos = EstabelecimentoSaude.objects.all()
         estab_tupla = [(i.id, i.dados_estabelecimento["CO_CNES"], i.dados_estabelecimento["NO_FANTASIA"]) for i in estabelecimentos]

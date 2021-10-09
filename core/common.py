@@ -58,6 +58,6 @@ def horarios_livres_por_dia_por_estabelecimento(est_id, data):
     dia_horas = [h.data_vacinacao for h in dia_horas]
     for i in range(24):
         agenda_add = datetime.strptime(f'{data} 08:00', "%d/%m/%Y %H:%M") + timedelta(minutes=10*i)
-        if not agenda_add in horarios_disp:
+        if not agenda_add in dia_horas:
             horarios_disp.append(agenda_add.strftime("%H:%M"))
     return horarios_disp
