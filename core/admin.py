@@ -2,7 +2,7 @@ from django.contrib import admin
 from core.models import Cidadao, EstabelecimentoSaude
     
 class CidadaoAdmin(admin.ModelAdmin):
-    fields = ('id', 'nome', 'nascimento', 'cpf')
+    list_display = ('id', 'nome', 'nascimento', 'cpf')
 
 class EstabelecimentoSaudeAdmin(admin.ModelAdmin):
     list_display = ('id', 'cnes', 'fantasia', 'bairro')

@@ -1,23 +1,49 @@
 from django.core.checks import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from django.contrib import messages
+from django.contrib import messages, auth
+from core.common import validador_cpf
+from datetime import date
+
+from core.models import Cidadao
 
 def inicio(request):
     return redirect('index')
 
 def index(request):
-    return render(request, 'index.html')
+    if request.user.is_authenticated:
+        cidadao = Cidadao.objects.filter(usuario=request.user).first() #Filtrando em cidadaos o usuario logado, e pegando o primeiro QuerySet
+        idade = date.today().year - cidadao.nascimento.year
+        if date(date.today().year, cidadao.nascimento.month, cidadao.nascimento.day) > date.today():
+            idade = idade - 1
+        return render(request, 'index.html', {
+            'cidadao': cidadao,
+            'idade': idade
+        })
+    else:
+        return render(request, 'index_noauth.html')
+
+    # return render(request, 'index.html')
 
 def cadastrar(request):
     if request.method != 'POST':
         return render(request, 'cadastrar.html')
 
     nome = request.POST.get('nome')
+
     nascimento = request.POST.get('nascimento')
-    cpf = request.POST.get('cpf')
+    data_nascimento = nascimento.split('-')
+    data_nascimento = date(int(data_nascimento[0]), int(data_nascimento[1]),int(data_nascimento[2]))
+
+    cpf = request.POST.get('cpf').split(".")
+    cpf_nodecoration = ''.join(cpf[0:2] + cpf[2].split("-"))
+
     senha = request.POST.get('senha')
     senha2 = request.POST.get('senha2')
+
+    idade = date.today().year - data_nascimento.year
+    if date(date.today().year, data_nascimento.month, data_nascimento.day) > date.today():
+        idade = idade - 1
 
     if not nome or not nascimento or not cpf or not senha or not senha2:
         messages.error(request, 'Algum campo está vazio.')
@@ -27,15 +53,45 @@ def cadastrar(request):
         messages.error(request, 'As senhas não conferem.')
         return render(request, 'cadastrar.html')
 
-    if len(cpf) != 11:
-        messages.error(request, 'CPF inválido.')
+    if len(senha) < 6:
+        messages.error(request, 'A senha precisa ter pelo menos 6 caracteres.')
         return render(request, 'cadastrar.html')
 
-    
-    return render(request, 'cadastrar.html')
+    if validador_cpf(cpf_nodecoration) == False:
+        messages.error(request, 'O cpf está inválido')
+        return render(request, 'cadastrar.html')
+
+    if idade < 18:
+        messages.error(request, 'Para realizar o cadastro, precisa ser maior de 18 anos.')
+        return render(request, 'cadastrar.html')
+
+    user = User.objects.create_user(cpf_nodecoration, email=None, password=senha)
+    user.save()
+
+    cidadao = Cidadao(nome=nome, cpf=cpf_nodecoration, nascimento=nascimento, usuario=user)
+    cidadao.save()
+    messages.success(request, 'Registrado com sucesso.')
+    return redirect('/cidadao/entrar')
 
 def entrar(request):
-    return render(request, 'entrar.html')
+    if request.method != 'POST':
+        return render(request, 'entrar.html')
+
+    cpf = request.POST.get('cpf')
+    senha = request.POST.get('senha')
+
+    user = auth.authenticate(request, username=cpf, password=senha)
+
+    if not user:
+        messages.error(request, 'Usuário ou senha estáo incorretos')
+        return render(request, 'entrar.html')
+    else:
+        auth.login(request, user)
+        return redirect('index')
 
 def agendar(request):
     return render(request, 'agendar.html')
+
+def sair(request):
+    auth.logout(request)
+    return redirect('/cidadao/')

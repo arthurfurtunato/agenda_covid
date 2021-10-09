@@ -1,7 +1,29 @@
 {% extends 'base.html' %}
 
-{% block title %}Index{% endblock %}
+{% block title %}Home|Autenticado{% endblock %}
 
-{% block content %}
-<h1>Eu sou o index</h1>
+{% block conteudo %}
+    <h1 class="mt-3 mb-3">Olá {{ cidadao.nome }}, você está autenticado!</h1>
+    <figcaption class="blockquote-footer">
+        Agora você pode fazer o agendamento clicando em <cite title="Source Title">"Fazer agendamento".</cite>    
+    </figcaption>
+    {% include 'parciais/_messages.html' %}
+    <div class="mt-3 mb-3">
+        <strong>Nome:</strong> {{ cidadao.nome }}<br>
+        <strong>Data de Nascimento:</strong> {{cidadao.nascimento}}<br>
+        <strong>Idade:</strong> {{ idade }}<br>
+        <strong>CPF:</strong> {{cidadao.cpf}}
+    </div>
+    <br>
+    {% if agendamento_estab %}
+    <div>
+        <h1>Agendamento</h1>
+        <p>Estabelecimento: {{ agendamento_estab }}</p>
+        <p>Horario: {{ agendamento_data }}</p>
+    </div>
+    {% endif %}
+    <a class="btn btn-danger" href="/cidadao/sair" role="button">Encerrar sessão</a>
+    {% if not agendamento_estab %}
+     <a class="btn btn-info" href="/cidadao/agendar" role="button">Fazer agendamento</a>
+    {% endif %}
 {% endblock %}
