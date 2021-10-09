@@ -32,7 +32,8 @@
         todayHighlight: true,
         autoclose: true,
         orientation: 'top',
-        datesDisabled: {{ dias_ocupados }}
+        datesDisabled: {{ dias_ocupados|safe }},
+        daysOfWeekDisabled: [0, 6]
       };
       date_input.datepicker(options);
     })

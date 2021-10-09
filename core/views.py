@@ -2,6 +2,7 @@ from django.core.checks import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages, auth
+from django.contrib.auth.decorators import login_required
 from core.common import get_dias_ocupados_por_estabelecimento, horarios_livres_por_dia_por_estabelecimento, validador_cpf
 from datetime import date, datetime
 import json
@@ -100,6 +101,7 @@ def entrar(request):
         auth.login(request, user)
         return redirect('index')
 
+@login_required(login_url='/cidadao/')
 def agendar(request):
     if len(Agendamento.objects.filter(cidadao=Cidadao.objects.filter(usuario=request.user).first())) > 0:
         messages.info(request, 'Cidadao ja tem agendamento')
@@ -121,6 +123,9 @@ def agendar(request):
                 'dias_ocupados': json.dumps(dias_ocupados)
             })
         elif 'data' in request.POST and not 'horarios' in request.POST:
+            if datetime.strptime(request.POST["data"], "%d/%m/%Y").weekday() in [5, 6]:
+                messages.error(request, 'Agendamento permitido somente de segunda à sexta.')
+                return redirect('/cidadao/')
             lista_horas = horarios_livres_por_dia_por_estabelecimento(request.POST['estabelecimento_id'], request.POST["data"])
             return render(request, 'agendar3.html', {
                 'horarios': lista_horas,
