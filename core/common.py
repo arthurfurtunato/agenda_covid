@@ -49,7 +49,7 @@ def get_dias_ocupados_por_estabelecimento(est_id):
             by_dias[i.data_vacinacao.date()].append(i.cidadao.id)
         else:
             by_dias[i.data_vacinacao.date()] = [i.cidadao.id]
-    dias_ocupados = [i for i, v in by_dias if len(v) >= 24]
+    dias_ocupados = [i for i, v in by_dias.items() if len(v) >= 24]
     return dias_ocupados
 
 def horarios_livres_por_dia_por_estabelecimento(est_id, data):

@@ -117,7 +117,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True #Lembrar de mudar quando for utilizar o datetime
+USE_TZ = False #Lembrar de mudar quando for utilizar o datetime
 
 
 # Static files (CSS, JavaScript, Images)
