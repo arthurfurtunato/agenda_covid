@@ -106,13 +106,9 @@ def agendar(request):
             dias_ocupados = get_dias_ocupados_por_estabelecimento(estab_n.id)
             return render(request, 'agendar2.html', {
                 'estabelecimento_id': estab_n.id,
-                'estabelecimento_nome': estab_n.nome,
+                'estabelecimento_nome': estab_n.dados_estabelecimento["NO_FANTASIA"],
                 'dias_ocupados': json.dumps(dias_ocupados)
             })
-
-    
-
-
     return render(request, 'agendar.html')
 
 def sair(request):
