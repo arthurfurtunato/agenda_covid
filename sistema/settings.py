@@ -135,9 +135,9 @@ ESTABELECIMENTOS_URL = 'https://selecoes.lais.huol.ufrn.br/static/estabeleciment
 from django.contrib.messages import constants
 
 MESSAGE_TAGS = {
-    constants.DEBUG: 'debug',
-    constants.INFO: 'info',
-    constants.SUCCESS: 'success',
-    constants.WARNING: 'warning',
-    constants.ERROR: 'error',
+    constants.DEBUG: 'alert-info',
+    constants.INFO: 'alert-info',
+    constants.SUCCESS: 'alert-success',
+    constants.WARNING: 'alert-warning',
+    constants.ERROR: 'alert-danger',
 }

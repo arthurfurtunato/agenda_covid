@@ -20,8 +20,8 @@ def cadastrar(request):
     senha2 = request.POST.get('senha2')
 
     if not nome or not nascimento or not cpf or not senha or not senha2:
-        messages.error(request, 'Algum campo está vazio.')
-        return render(request, 'cadastra.html')
+        messages.add_message(request, messages.ERROR, 'Algum campo está vazio.')
+        return render(request, 'cadastrar.html')
 
     if senha != senha2:
         messages.error(request, 'As senhas não conferem.')
@@ -29,7 +29,7 @@ def cadastrar(request):
 
     if len(cpf) != 11:
         messages.error(request, 'CPF inválido.')
-        return render(request, 'cadastra.html')
+        return render(request, 'cadastrar.html')
 
 
     return render(request, 'cadastrar.html')
