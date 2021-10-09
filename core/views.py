@@ -5,7 +5,7 @@ from django.contrib import messages, auth
 from core.common import validador_cpf
 from datetime import date
 
-from core.models import Cidadao
+from core.models import Cidadao, EstabelecimentoSaude
 
 def inicio(request):
     return redirect('index')
@@ -22,8 +22,6 @@ def index(request):
         })
     else:
         return render(request, 'index_noauth.html')
-
-    # return render(request, 'index.html')
 
 def cadastrar(request):
     if request.method != 'POST':
@@ -51,6 +49,10 @@ def cadastrar(request):
 
     if senha != senha2:
         messages.error(request, 'As senhas não conferem.')
+        return render(request, 'cadastrar.html')
+
+    if Cidadao.objects.filter(cpf=cpf_nodecoration).exists():
+        messages.error(request, 'CPF já existente.')
         return render(request, 'cadastrar.html')
 
     if len(senha) < 6:
@@ -90,6 +92,15 @@ def entrar(request):
         return redirect('index')
 
 def agendar(request):
+    if request.method == 'GET':
+        estabelecimentos = EstabelecimentoSaude.objects.all()
+        estab_tupla = [(i.id, i.dados_estabelecimento["CO_CNES"], i.dados_estabelecimento["NO_FANTASIA"]) for i in estabelecimentos]
+        return render(request, 'agendar1.html', {
+            'estabelecimentos': estab_tupla
+        })
+    
+
+
     return render(request, 'agendar.html')
 
 def sair(request):
