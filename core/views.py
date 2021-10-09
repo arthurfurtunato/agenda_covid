@@ -2,10 +2,11 @@ from django.core.checks import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages, auth
-from core.common import validador_cpf
+from core.common import get_dias_ocupados_por_estabelecimento, validador_cpf
 from datetime import date
+import json
 
-from core.models import Cidadao, EstabelecimentoSaude
+from core.models import Agendamento, Cidadao, EstabelecimentoSaude
 
 def inicio(request):
     return redirect('index')
@@ -98,6 +99,17 @@ def agendar(request):
         return render(request, 'agendar1.html', {
             'estabelecimentos': estab_tupla
         })
+    else:
+        if 'estabelecimento' in request.POST:
+            estab = EstabelecimentoSaude.objects.filter(id=request.POST['estabelecimento'])
+            estab_n = estab[0]
+            dias_ocupados = get_dias_ocupados_por_estabelecimento(estab_n.id)
+            return render(request, 'agendar2.html', {
+                'estabelecimento_id': estab_n.id,
+                'estabelecimento_nome': estab_n.nome,
+                'dias_ocupados': json.dumps(dias_ocupados)
+            })
+
     
 
 

@@ -40,3 +40,15 @@ def validador_cpf(cpf):
         return True
     else:
         return False
+
+def get_dias_ocupados_por_estabelecimento(est_id):
+    by_dias = {}
+    agendas = Agendamento.objects.filter(estabelecimento=est_id).first()
+    for i in agendas:
+        if i.data_vacinacao.date() in by_dias:
+            by_dias[i.data_vacinacao.date()].append(i.cidadao.id)
+        else:
+            by_dias[i.data_vacinacao.date()] = [i.cidadao.id]
+    dias_ocupados = [i for i, v in by_dias if len(v) >= 24]
+    return dias_ocupados
+    

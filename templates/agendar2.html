@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Agendar{% endblock %}
+
+{% block conteudo %}
+<h1 style="margin-top: 20px;">Continuando o agendamento</h1>
+<figcaption class="blockquote-footer" style="margin-top: 10px;">
+    Agora como próximo passo escolha a data de sua vacinação.
+</figcaption>
+<br>
+  <p>Estabelecimento escolhido: {{ estabelecimento_nome }}</p>
+<br>
+<form method="POST" action="{% url 'agendar' %}">
+{% csrf_token %}
+<input type="hidden" value="{{ estabelecimento_id }}" name="estabelecimento_id">
+<input type="hidden" value="{{ estabelecimento_nome }}" name="estabelecimento_nome">
+<div class="form-group">
+    <label for="sel1">Datas</label>
+    <input class="form-control" id="data" name="data" placeholder="DD/MM/YYY" type="text"/>
+</div>
+<div class="mt-3 mb-3">
+    <button type="submit" class="btn btn-primary">Próximo</button>
+</div>
+</form>
+<script>
+    $(document).ready(function(){
+      var date_input=$('input[name="data"]'); //our date input has the name "data"
+      var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+      var options={
+        format: 'dd/mm/yyyy',
+        container: container,
+        todayHighlight: true,
+        autoclose: true,
+        orientation: 'top',
+        datesDisabled: {{ dias_ocupados }}
+      };
+      date_input.datepicker(options);
+    })
+</script>
+{% endblock %}
