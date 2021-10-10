@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from core.common import get_dias_ocupados_por_estabelecimento, horarios_livres_por_dia_por_estabelecimento, validador_cpf
 from datetime import date, datetime
 import json
+from django.db.models import Count
+from django.db.models.functions import ExtractWeekDay
 
 from core.models import Agendamento, Cidadao, EstabelecimentoSaude
 
@@ -155,3 +157,24 @@ def agendar(request):
 def sair(request):
     auth.logout(request)
     return redirect('/cidadao/')
+
+def dashboard(request):
+    dias_da_semana = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']
+
+    estab_agendas = EstabelecimentoSaude.objects.all().annotate(num_agendamentos=Count('agendamento'))
+    estab_agendas_dict = {}
+    for i in estab_agendas:
+        if i.num_agendamentos>0:
+            estab_agendas_dict[i.dados_estabelecimento['NO_FANTASIA']] = i.num_agendamentos
+    
+    agendas_semana = Agendamento.objects.all().annotate(dia_semana=ExtractWeekDay('data_vacinacao')).values('dia_semana').annotate(num_agendamentos=Count('id'))
+    agendas_semana_dict = {}
+    for i in agendas_semana:
+        agendas_semana_dict[dias_da_semana[i['dia_semana'] - 1]] = i['num_agendamentos']
+    
+    return render(request, 'dashboard.html', {
+        'estab_agendas_labels': json.dumps(list(estab_agendas_dict.keys())),
+        'estab_agendas_values': json.dumps(list(estab_agendas_dict.values())),
+        'agendas_semana_labels': json.dumps(list(agendas_semana_dict.keys())),
+        'agendas_semana_values': json.dumps(list(agendas_semana_dict.values()))
+    })
