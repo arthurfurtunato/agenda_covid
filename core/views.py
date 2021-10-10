@@ -3,11 +3,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
-from core.common import get_dias_ocupados_por_estabelecimento, horarios_livres_por_dia_por_estabelecimento, validador_cpf
+from core.common import *
 from datetime import date, datetime
 import json
 from django.db.models import Count
 from django.db.models.functions import ExtractWeekDay
+import locale
 
 from core.models import Agendamento, Cidadao, EstabelecimentoSaude
 
@@ -21,9 +22,12 @@ def index(request):
         agendamento = Agendamento.objects.filter(cidadao=cidadao)
         agendamento_estab = ""
         agendamento_data = ""
+        locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
         if len(agendamento) > 0:
-            agendamento_estab = agendamento.first().estabelecimento.dados_estabelecimento["NO_FANTASIA"]
-            agendamento_data = agendamento.first().data_vacinacao.strftime("%d/%m/%Y às %H:%M")
+            estab_nome = agendamento.first().estabelecimento.dados_estabelecimento['NO_FANTASIA']
+            estab_cnes = agendamento.first().estabelecimento.dados_estabelecimento['CO_CNES']
+            agendamento_estab = f"CNES: {estab_cnes} - NOME: {estab_nome}"
+            agendamento_data = agendamento.first().data_vacinacao.strftime("%d/%m/%Y às %H:%M, %A")
         if date(date.today().year, cidadao.nascimento.month, cidadao.nascimento.day) > date.today():
             idade = idade - 1
         return render(request, 'index.html', {
@@ -158,6 +162,7 @@ def sair(request):
     auth.logout(request)
     return redirect('/cidadao/')
 
+@user_passes_test(group_check, login_url='/cidadao/')
 def dashboard(request):
     dias_da_semana = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado']
 

@@ -1,5 +1,9 @@
 from core.models import Agendamento
 from datetime import datetime, timedelta
+from django.contrib.auth.decorators import user_passes_test
+
+def group_check(user):
+    return user.groups.filter(name__in=['gerente'])
 
 def validador_cpf(cpf):
     if len(cpf) != 11:
